@@ -16,15 +16,17 @@ interface SagaActivity
     void runCompensatingAction();
 }
 
+// Reserve car saga activity
 class ReserveCar implements SagaActivity {
 
     public boolean success = false;
     int val = 0;
+    public int maxRand = 100;
 
     public void runAction() {
         Random rand = new Random();
         val = rand.nextInt(100); // Create random value between 0 - 100 and if num < 50 successful brand
-        if (val < 70) {
+        if (val <= maxRand) { // activity is successful if less than maxRand
             success = true;
             System.out.println("Reserved a car.");
         }
@@ -33,26 +35,28 @@ class ReserveCar implements SagaActivity {
 
     public void runCompensatingAction() {
         success = false;
-        if (val >= 70) {
+        if (val > maxRand) { // if val > maxRand - this service failed
             System.out.println("Failed to reserve car.");
         }
-        else {
+        else { // rollback
             System.out.println("Canceled reserved car.");
         }
 
     }
 }
 
+// Book hotel activity
 class BookHotel implements SagaActivity {
 
     public boolean success = false;
     int val = 0;
+    public int maxRand = 100;
 
     @Override
     public void runAction() throws Exception {
         Random rand = new Random();
         val = rand.nextInt(100); // Create random value between 0 - 100 and if num < 50 successful brand
-        if (val < 70) {
+        if (val <= maxRand) { // activity is successful if less than maxRand
             success = true;
             System.out.println("Booked a hotel.");
         }
@@ -61,27 +65,29 @@ class BookHotel implements SagaActivity {
 
     @Override
     public void runCompensatingAction() {
-        if (val >= 70) {
+        if (val > maxRand) { // if val > maxRand - this service failed
             System.out.println("Failed to retrieve hotel reservations.");
         }
-        else {
+        else { // rollback
             System.out.println("Canceled hotel reservations.");
         }
 
     }
 }
 
+// Book flight activity
 class BookFlight implements SagaActivity {
 
     public boolean success = false;
     int val = 0;
+    public int maxRand = 100;
 
     @Override
     public void runAction() throws Exception {
         Random rand = new Random();
         val = rand.nextInt(100); // Create random value between 0 - 100 and if num < 50 successful brand
 
-        if (val < 70) {
+        if (val <= maxRand) { // activity is successful if less than maxRand
             success = true;
             System.out.println("Booked a flight.");
         }
@@ -90,10 +96,10 @@ class BookFlight implements SagaActivity {
     @Override
     public void runCompensatingAction() {
         success = false;
-        if (val >= 70) {
+        if (val > maxRand) { // if val > maxRand - this service failed
             System.out.println("Failed to retrieve flight reservations.");
         }
-        else {
+        else { // rollback but since it's the last service it would fail never rollback
             System.out.println("Canceled flight reservations.");
         }
     }
@@ -109,19 +115,10 @@ class Saga {
     // must run in reverse order of their original application.  Returns
     // true if the entire Saga completed successfully or false otherwise.
 
-    // Create the saga activities to cast the saga activitiy queue
+    // Create the saga activities to cast the saga activities in the queue
     ReserveCar reserveCar = new ReserveCar();
     BookHotel bookHotel = new BookHotel();
     BookFlight bookFlight = new BookFlight();
-//
-//    // Build the saga
-//    SagaBuilder sagaBuilder = new SagaBuilder(); // utility function to build activities
-//    final SagaBuilder sb1 = sagaBuilder.activity(reserveCar); // build first activity in saga builder
-//    final SagaBuilder sb2 = sagaBuilder.activity(bookHotel); // build second activity in saga builder
-//    public SagaBuilder sb3 = sagaBuilder.activity(bookFlight); // build third activity in saga builder
-//    public Queue<SagaActivity> activities = sb3.activities; // Get activities from saga builder
-
-//    public Queue<SagaActivity> activities = saga.activities;
 
     public Queue<SagaActivity> activities = new LinkedList<>();
 
@@ -159,7 +156,7 @@ class Saga {
                 if (bookFlight.success == true) {
                     result = true; // if last activity passes, than saga passed
                 }
-                else { // saga failed at last stage
+                else { // saga failed at last stage so roll back
                     bookFlight.runCompensatingAction();
                     bookHotel.runCompensatingAction();
                     reserveCar.runCompensatingAction();

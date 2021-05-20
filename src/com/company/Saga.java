@@ -167,7 +167,7 @@ class Saga {
 
             ++count;
         }
-        return result;
+        return result; // return if saga succeeded or not failed
     }
 }
 
@@ -175,7 +175,7 @@ class Saga {
 // A utility class to make constructing sagas easier.
 class SagaBuilder {
 
-    Queue<SagaActivity> activities = new LinkedList<>(); // Create saga class
+    Queue<SagaActivity> activities = new LinkedList<>(); // Create saga activiity list
 
     // Add the specified activity to the to-be-built saga.
     public SagaBuilder activity(SagaActivity activity) {
